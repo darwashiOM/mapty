@@ -13,7 +13,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class Workout {
   date = new Date();
-  id = (new Date() + '').slice(-10);
+  id = (date.now() + '').slice(-10);
 
   constructor(coords, distance, duration) {
     this.coords = coords;
@@ -91,7 +91,33 @@ class App {
   }
 
   _newWorkout(e) {
+    const validInputs = (...inputs) =>
+      inputs.every(inp => Number.isFinite(inp));
+    const positiveInputs = (...inputs) => inputs.every(inp => inp >= 0);
     e.preventDefault();
+
+    const type = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
+
+    if (type === 'running') {
+      const cadence = +inputCadence.value;
+
+      if (
+        !validInputs(duration, distance, cadence) ||
+        !positiveInputs(duration, distance, cadence)
+      )
+        return alert('inputs have to be positive');
+    }
+    if (type === 'running') {
+      const elevation = +inputElevation.value;
+
+      if (
+        !validInputs(duration, distance, elevation) ||
+        !positiveInputs(duration, distance)
+      )
+        return alert('inputs have to be positive');
+    }
 
     inputCadence.value =
       inputDistance.value =
