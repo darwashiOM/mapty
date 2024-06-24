@@ -70,6 +70,7 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     inputType.addEventListener('change', this._toggleElevationField.bind(this));
+    this._getLocalStorage();
   }
   _getPosition() {
     if (navigator.geolocation)
@@ -91,6 +92,11 @@ class App {
     }).addTo(this.#map);
 
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach(workout => {
+      this._renderWorkoutList(workout);
+      this._renderWorkoutMarker(workout);
+    });
   }
 
   _showForm(mapE) {
@@ -153,12 +159,13 @@ class App {
     }
 
     this.#workouts.push(workout);
-    console.log(this.#workouts);
 
     this._renderWorkoutMarker(workout);
     this._renderWorkoutList(workout);
 
     this._hideForm();
+
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -173,7 +180,9 @@ class App {
           className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent('Workout')
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.discription}`
+      )
       .openPopup();
   }
 
@@ -233,7 +242,22 @@ class App {
     const workout = this.#workouts.find(
       work => work.id === workoutEL.dataset.id
     );
-    this.#map.setView(workout.coords, 13);
+    this.#map.setView(workout.coords, 13, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    if (!data) return false;
+    this.#workouts = data;
   }
 }
 
